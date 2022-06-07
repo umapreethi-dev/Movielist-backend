@@ -73,10 +73,18 @@ const movies = [
     }
    ];
 
-app.get("/movies", function(req,res) {
-    const {rating} = req.query;
-    const movieRating = movies.filter(item => item.rating == rating);
-    rating ? res.send(movieRating) : res.send(movies);
+app.get("/movies", async function(req,res) {
+    let filter = req.query;
+    if(filter.rating){
+        filter.rating = +filter.rating;
+    }
+    //const movieRating = movies.filter(item => item.rating == rating);
+    // connect to db 
+    // the output will have pagination, we need array as output to show
+    const allMovies = await client.db("test").collection("movies").find(filter).toArray()
+    //const movieRating = await client.db("test").collection("movies").findOne({rating: rating})
+    //rating ? res.send(movieRating) : res.send(movies);
+    res.send(allMovies)
 })
 
 app.get("/movies/:id", async function(req,res){
@@ -85,6 +93,7 @@ app.get("/movies/:id", async function(req,res){
     //console.log(req.params);
     
     // connect with db
+    
     const movie = await client.db("test").collection("movies").findOne({ id: id});
     movie ? res.send(movie) : res.send("No movie found with that ID") ;
 })
@@ -95,6 +104,18 @@ app.post("/movies", async function(req,res){
     res.send(updatedMovie);
 })
 
+app.delete("/movies/:id", async function(req,res){
+    const {id} = req.params;
+    const deletedMovie = await client.db("test").collection("movies").deleteOne({ id: id})
+    deletedMovie ? res.send(deletedMovie) : res.send("No Movie is deleted") ;
+})
+
+app.put("/movies/:id", async function(req,res){
+    const {id} = req.params;
+    const updateData = req.body;
+    const updatedMovie = await client.db("test").collection("movies").updateOne({ id: id}, {$set: updateData})
+    updatedMovie ? res.send(updatedMovie) : res.send(" Movie is updated") ;
+})
 
 
 app.listen(PORT, function(){
