@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 const app = express();
 app.use(express.json());// converting the values to json
-const PORT = '3000'
+const PORT = process.env.PORT;
 
 //const MONGO_URL = "mongodb://localhost";
 const MONGO_URL = process.env.MONGO_URL;
